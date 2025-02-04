@@ -1,0 +1,27 @@
+Simple Core Metrics is a minimalistic watch face that presents essential daily metrics in a structured and easy-to-read format. It provides the following information:
+
+Date – Displays the current day.
+
+Unread Notifications Count – Shows the number of pending notifications.
+
+Battery Status – Indicates battery percentage and estimated days remaining.
+
+Min-Max Temperature – Displays the day's temperature range in °C or °F based on user settings.
+
+Feels Like Temperature – Shows the perceived temperature.
+
+Precipitation Chance – Displays the likelihood of rain or snow.
+
+Phone Connection Indicator – Appears only when the phone is disconnected.
+
+Time – Clearly displays the current time.
+
+Alarm Indicator – Shown only when an alarm is set.
+
+Calories Burned – Displays the total calories burned for the day in kcal.
+
+Distance Traveled – Shows the distance covered in km or miles based on user settings.
+
+Heart Rate – Displays the current heart rate.
+
+This watch face focuses on delivering key information efficiently, without unnecessary elements, ensuring all important data is available at a glance.
