@@ -4,10 +4,14 @@ import Toybox.System;
 import Toybox.WatchUi;
 import Toybox.Time;
 import Toybox.Time.Gregorian;
+import Toybox.Application.Properties;
 
 class SimpleCoreMetricsView extends WatchUi.WatchFace {
+  var rightWeatherIndicatorProperty;
+
   function initialize() {
     WatchFace.initialize();
+    getProperties();
   }
 
   // Load your resources here
@@ -57,6 +61,18 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
   // Terminate any active timers and prepare for slow updates.
   function onEnterSleep() as Void {}
 
+  function handleSettingsUpdate() as Void {
+    getProperties();
+  }
+
+  hidden function getProperties() as Void {
+    rightWeatherIndicatorProperty = Properties.getValue("RightWeatherIndicator") as Number;
+  }
+
+  private function isDistanceMetric() as Boolean {
+    return System.getDeviceSettings().distanceUnits == System.UNIT_METRIC;
+  }
+
   private function setDate() as Void {
     var dateLabel = View.findDrawableById("DateLabel") as Text;
     var now = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
@@ -65,10 +81,8 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
   }
 
   private function setNotifications() as Void {
-    var notificationCountLabel =
-      View.findDrawableById("NotificationCountLabel") as Text;
-    var notificationCountIcon =
-      View.findDrawableById("NotificationCountIcon") as Text;
+    var notificationCountLabel = View.findDrawableById("NotificationCountLabel") as Text;
+    var notificationCountIcon = View.findDrawableById("NotificationCountIcon") as Text;
 
     var notificationCount = System.getDeviceSettings().notificationCount;
 
@@ -84,10 +98,8 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
 
   private function setBattery() as Void {
     var batteryLabel = View.findDrawableById("BatteryLabel") as Text;
-    var batteryPercentage =
-      Toybox.System.getSystemStats().battery.toNumber().toString() + "%";
-    var batteryInDays =
-      Toybox.System.getSystemStats().batteryInDays.format("%.1f");
+    var batteryPercentage = Toybox.System.getSystemStats().battery.toNumber().toString() + "%";
+    var batteryInDays = Toybox.System.getSystemStats().batteryInDays.format("%.1f");
     var batteryString = batteryPercentage + " " + batteryInDays;
     batteryLabel.setText(batteryString);
   }
@@ -101,16 +113,13 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
       return;
     }
 
-    var isTemperatureCelcius =
-      System.getDeviceSettings().temperatureUnits == System.UNIT_METRIC;
+    var isTemperatureCelcius = System.getDeviceSettings().temperatureUnits == System.UNIT_METRIC;
 
     // low-high temperatures
     var lowTemperatureStr;
     var lowTemperatureCelcius = currentWeather.lowTemperature;
     if (lowTemperatureCelcius != null) {
-      var lowTemperature = isTemperatureCelcius
-        ? lowTemperatureCelcius
-        : (lowTemperatureCelcius * 9) / 5 + 32;
+      var lowTemperature = isTemperatureCelcius ? lowTemperatureCelcius : (lowTemperatureCelcius * 9) / 5 + 32;
       lowTemperatureStr = Math.round(lowTemperature).toNumber() + "°";
     } else {
       lowTemperatureStr = "--";
@@ -119,9 +128,7 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
     var highTemperatureStr;
     var highTemperatureCelcius = currentWeather.highTemperature;
     if (highTemperatureCelcius != null) {
-      var highTemperature = isTemperatureCelcius
-        ? highTemperatureCelcius
-        : (highTemperatureCelcius * 9) / 5 + 32;
+      var highTemperature = isTemperatureCelcius ? highTemperatureCelcius : (highTemperatureCelcius * 9) / 5 + 32;
       highTemperatureStr = Math.round(highTemperature).toNumber() + "°";
     } else {
       highTemperatureStr = "--";
@@ -134,28 +141,35 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
     var feelsLikeTempCelcius = currentWeather.feelsLikeTemperature;
 
     if (feelsLikeTempCelcius != null) {
-      var feelsLikeTemp = isTemperatureCelcius
-        ? feelsLikeTempCelcius
-        : (feelsLikeTempCelcius * 9) / 5 + 32;
+      var feelsLikeTemp = isTemperatureCelcius ? feelsLikeTempCelcius : (feelsLikeTempCelcius * 9) / 5 + 32;
       feelsLikeTempStr = Math.round(feelsLikeTemp).toNumber() + "°";
     } else {
       feelsLikeTempStr = "--";
     }
 
-    // precipitation chance
-    var precipitationChance = currentWeather.precipitationChance;
-    var precipitationChanceStr = precipitationChance != null ? "p" + precipitationChance + "%" : "--";
+    var rightWeatherIndicatorStr = "--";
+    if (rightWeatherIndicatorProperty == Constants.PRECIPITATION_OPTION) {
+      var precipitationChance = currentWeather.precipitationChance;
+      rightWeatherIndicatorStr = precipitationChance != null ? "p" + precipitationChance + "%" : "--";
+    } else if (rightWeatherIndicatorProperty == Constants.HUMIDITY_OPTION) {
+      var humidity = currentWeather.relativeHumidity;
+      rightWeatherIndicatorStr = humidity != null ? "h" + humidity + "%" : "--";
+    } else if (rightWeatherIndicatorProperty == Constants.WIND_SPEED_OPTION) {
+      var windSpeed = currentWeather.windSpeed;
+      if (windSpeed == null) {
+        rightWeatherIndicatorStr = "--";
+      } else {
+        rightWeatherIndicatorStr = isDistanceMetric()
+          ? Math.round(windSpeed * 3.6).toNumber() + "kph"
+          : Math.round(windSpeed * 2.23694).toNumber() + "mph";
+      }
+    }
 
-    // whole weather string
-    var weatherString =
-      lowHighTempsStr + "  " + feelsLikeTempStr + "  " + precipitationChanceStr;
-
-    weatherLabel.setText(weatherString);
+    weatherLabel.setText(lowHighTempsStr + "  " + feelsLikeTempStr + "  " + rightWeatherIndicatorStr);
   }
 
   private function setBluetoothIndicator() as Void {
-    var phoneConnectionLabel =
-      View.findDrawableById("PhoneConnectionLabel") as Text;
+    var phoneConnectionLabel = View.findDrawableById("PhoneConnectionLabel") as Text;
     var isPhoneDisconnected = !System.getDeviceSettings().phoneConnected;
     if (isPhoneDisconnected) {
       phoneConnectionLabel.setVisible(true);
@@ -167,10 +181,7 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
   private function setTime() as Void {
     var clockTime = System.getClockTime();
 
-    var timeString = Lang.format("$1$:$2$", [
-      clockTime.hour.format("%02d"),
-      clockTime.min.format("%02d"),
-    ]);
+    var timeString = Lang.format("$1$:$2$", [clockTime.hour.format("%02d"), clockTime.min.format("%02d")]);
 
     var timeLabel = View.findDrawableById("TimeLabel") as Text;
     timeLabel.setText(timeString);
@@ -188,8 +199,7 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
 
   private function setHeartRate() as Void {
     var currentHeartRate = Activity.getActivityInfo().currentHeartRate;
-    var currentHeartRateStr =
-      currentHeartRate != null ? currentHeartRate.toString() : "--";
+    var currentHeartRateStr = currentHeartRate != null ? currentHeartRate.toString() : "--";
 
     var heartRateLabel = View.findDrawableById("HeartRateLabel") as Text;
     heartRateLabel.setText(currentHeartRateStr);
@@ -202,10 +212,6 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
     caloriesLabel.setText(caloriesStr);
   }
 
-  private function isDistanceMetric() as Boolean {
-    return System.getDeviceSettings().distanceUnits == System.UNIT_METRIC;
-  }
-
   private function setDistance() as Void {
     var distanceUnits = View.findDrawableById("DistanceUnits") as Text;
     distanceUnits.setText(isDistanceMetric() ? "km" : "mi");
@@ -216,9 +222,7 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
       distanceLabel.setText("--");
       return;
     }
-    var distance = isDistanceMetric()
-      ? distanceCm / 100000.0
-      : distanceCm / 160934.0;
+    var distance = isDistanceMetric() ? distanceCm / 100000.0 : distanceCm / 160934.0;
     var distanceStr = distance.format("%.1f");
     distanceLabel.setText(distanceStr);
   }

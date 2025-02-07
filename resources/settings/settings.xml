@@ -1,0 +1,11 @@
+<settings>
+
+    <setting propertyKey="@Properties.RightWeatherIndicator" title="@Strings.RightWeatherIndicator">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.Precipitation</listEntry>
+            <listEntry value="1">@Strings.Humidity</listEntry>
+            <listEntry value="2">@Strings.WindSpeed</listEntry>
+        </settingConfig>
+    </setting>
+
+</settings>

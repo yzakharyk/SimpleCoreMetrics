@@ -1,3 +1,10 @@
 <strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://developer.garmin.com/downloads/connect-iq/resources.xsd">
     <string id="AppName">SimpleCoreMetrics</string>
+    
+    <string id="RightWeatherIndicator">Right Weather Indicator</string>
+    <string id="Precipitation">Precipitation</string>
+    <string id="Humidity">Humidity</string>
+    <string id="WindSpeed">Wind speed</string>
+
+
 </strings>
