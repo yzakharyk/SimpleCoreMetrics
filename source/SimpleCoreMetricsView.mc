@@ -66,7 +66,7 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
   }
 
   hidden function getProperties() as Void {
-    rightWeatherIndicatorProperty = Properties.getValue("RightWeatherIndicator") as Number;
+   rightWeatherIndicatorProperty = Properties.getValue("RightWeatherIndicator") as Number;
   }
 
   private function isDistanceMetric() as Boolean {
@@ -159,9 +159,10 @@ class SimpleCoreMetricsView extends WatchUi.WatchFace {
       if (windSpeed == null) {
         rightWeatherIndicatorStr = "--";
       } else {
+        var windArrow = Utils.getWindArrow(currentWeather.windBearing);
         rightWeatherIndicatorStr = isDistanceMetric()
-          ? Math.round(windSpeed * 3.6).toNumber() + "kph"
-          : Math.round(windSpeed * 2.23694).toNumber() + "mph";
+          ? Math.round(windSpeed * 3.6).toNumber() + windArrow
+          : Math.round(windSpeed * 2.23694).toNumber() + windArrow;
       }
     }
 
